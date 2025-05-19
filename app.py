@@ -8,7 +8,7 @@ st.set_page_config(page_title="SHIROE LABO カウンセリングシート", layo
 
 # ロゴとタイトル
 st.image("logo.png", width=300)
-st.markdown("<h2 style='text-align: center;'>カウンセリングシート</h2>", unsafe_allow_html=True)
+st.markdown("## カウンセリングシート")
 
 def lookup_address(zipcode):
     if len(zipcode) == 7 and zipcode.isdigit():
@@ -61,38 +61,32 @@ with st.form(key="counseling_form"):
 
     st.subheader("■ 印象・目的について")
 
-    st.markdown("**なりたい印象（複数選択可）**")
-    impressions = []
-    for opt in ["清潔感がある", "若々しく見える", "自信に溢れて信頼感がある", "垢抜けている",
-                "健康的な印象"]:
-        if st.checkbox(opt, key=f"imp_{opt}"):
-            impressions.append(opt)
+    impressions = st.multiselect("**なりたい印象（複数選択）**", [
+        "清潔感がある", "若々しく見える", "自信に溢れて信頼感がある", "垢抜けている",
+        "健康的な印象"
+    ])
 
-    st.markdown("**ご来店の目的・背景（複数選択可）**")
-    motives = []
-    for opt in ["仕事・面接に向けて", "恋愛・婚活", "大切な予定のため", "自分磨き", "SNSなどで気になった"]:
-        if st.checkbox(opt, key=f"mot_{opt}"):
-            motives.append(opt)
+    motive = st.multiselect("**ご来店の目的・背景（複数選択）**", [
+        "仕事・面接に向けて", "恋愛・婚活", "大切な予定のため", "自分磨き",
+        "SNSなどで気になった", "なんとなく整えたい"
+    ])
 
-    st.markdown("**現在の歯の状態（複数選択可）**")
-    states = []
-    for opt in ["少し黄ばみが気になる", "人と比べて気になる", "鏡や写真で気になる", "笑う時に気になる"]:
-        if st.checkbox(opt, key=f"state_{opt}"):
-            states.append(opt)
+    tooth_state = st.multiselect("**現在の歯の状態（複数選択可）**", [
+        "少し黄ばみが気になる", "人と比べて気になる",
+        "鏡や写真で気になる", "笑う時に気になる"
+    ])
 
-    st.markdown("**これまでのホワイトニング経験（複数選択可）**")
-    histories = []
-    for opt in ["初めて", "歯科ホワイトニング", "セルフホワイトニング（サロン）",
-                "ホームホワイトニング（歯科キット）", "市販ホワイトニング（歯磨き粉・シート等）"]:
-        if st.checkbox(opt, key=f"hist_{opt}"):
-            histories.append(opt)
+    history = st.multiselect("**これまでのホワイトニング経験（複数選択）**", [
+        "初めて", "歯科ホワイトニング", "セルフホワイトニング（サロン）",
+        "ホームホワイトニング（歯科キット）", "市販ホワイトニング（歯磨き粉・シート等）"
+    ])
 
-    st.markdown("**理想の通い方（複数選択可）**")
-    styles = []
-    for opt in ["週1〜2回で集中して通いたい", "月2回くらいのペースで通いたい",
-                "不定期でも気になったときに通いたい", "一度白くしたら、その後は維持として通いたい"]:
-        if st.checkbox(opt, key=f"style_{opt}"):
-            styles.append(opt)
+    style = st.multiselect("**理想の通い方（複数選択可）**", [
+        "週1〜2回で集中して通いたい",
+        "月2回くらいのペースで通いたい",
+        "不定期でも気になったときに通いたい",
+        "一度白くしたら、その後は維持として通いたい"
+    ])
 
     st.markdown("**その他、気になること・不安など**")
     concerns = st.text_area("")
@@ -102,12 +96,13 @@ with st.form(key="counseling_form"):
         st.markdown("""
 ●施術後の仕上がりには個人差があります。  
 ●医療機関で治療中の方は医師へ確認の上で施術を行ってください。  
-●施術後の返金には応じかねます。
+●施術後の返金には応じかねます。  
         """)
 
     agree = st.checkbox("上記注意事項をすべて確認し、同意しました。")
-    date = datetime.today().strftime("%Y-%m-%d")
-    st.markdown(f"**同意日：{date}**")
+    if agree:
+        date = datetime.today().strftime("%Y-%m-%d")
+        st.markdown(f"**同意日：{date}**")
 
     st.subheader("■ 署名欄")
     canvas_result = st_canvas(
@@ -121,10 +116,7 @@ with st.form(key="counseling_form"):
         key="canvas"
     )
 
-    if agree:
-        submit_btn = st.form_submit_button("送信", type="primary")
-    else:
-        submit_btn = st.form_submit_button("送信")
+    submit_btn = st.form_submit_button("送信", type="primary")
 
     if submit_btn and agree:
         st.success("回答を受け付けました（※保存処理は後で接続）")
