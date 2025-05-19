@@ -7,7 +7,7 @@ from streamlit_drawable_canvas import st_canvas
 st.set_page_config(page_title="SHIROE LABO カウンセリングシート", layout="centered")
 
 # ロゴとタイトル
-st.markdown('<div style="text-align: center;"><img src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/logo.png" width="300"></div>', unsafe_allow_html=True)
+st.image("logo.png", width=300)
 st.markdown("<h2 style='text-align: center;'>カウンセリングシート</h2>", unsafe_allow_html=True)
 
 def lookup_address(zipcode):
@@ -62,39 +62,47 @@ with st.form(key="counseling_form"):
     st.subheader("■ 印象・目的について")
 
     st.markdown("**なりたい印象（複数選択可）**")
-    impressions = st.multiselect("", [
-        "清潔感がある", "若々しく見える", "自信に溢れて信頼感がある", "垢抜けている", "健康的な印象"
-    ])
+    impressions = []
+    for opt in ["清潔感がある", "若々しく見える", "自信に溢れて信頼感がある", "垢抜けている",
+                "健康的な印象"]:
+        if st.checkbox(opt, key=f"imp_{opt}"):
+            impressions.append(opt)
 
     st.markdown("**ご来店の目的・背景（複数選択可）**")
-    motive = st.multiselect("", [
-        "仕事・面接に向けて", "恋愛・婚活", "大切な予定のため", "自分磨き", "SNSなどで気になった"
-    ])
+    motives = []
+    for opt in ["仕事・面接に向けて", "恋愛・婚活", "大切な予定のため", "自分磨き", "SNSなどで気になった"]:
+        if st.checkbox(opt, key=f"mot_{opt}"):
+            motives.append(opt)
 
     st.markdown("**現在の歯の状態（複数選択可）**")
-    tooth_state = st.multiselect("", [
-        "少し黄ばみが気になる", "人と比べて気になる", "鏡や写真で気になる", "笑う時に気になる"
-    ])
+    states = []
+    for opt in ["少し黄ばみが気になる", "人と比べて気になる", "鏡や写真で気になる", "笑う時に気になる"]:
+        if st.checkbox(opt, key=f"state_{opt}"):
+            states.append(opt)
 
     st.markdown("**これまでのホワイトニング経験（複数選択可）**")
-    history = st.multiselect("", [
-        "初めて", "歯科ホワイトニング", "セルフホワイトニング（サロン）", "ホームホワイトニング（歯科キット）", "市販ホワイトニング（歯磨き粉・シート等）"
-    ])
+    histories = []
+    for opt in ["初めて", "歯科ホワイトニング", "セルフホワイトニング（サロン）",
+                "ホームホワイトニング（歯科キット）", "市販ホワイトニング（歯磨き粉・シート等）"]:
+        if st.checkbox(opt, key=f"hist_{opt}"):
+            histories.append(opt)
 
     st.markdown("**理想の通い方（複数選択可）**")
-    style = st.multiselect("", [
-        "週1〜2回で集中して通いたい", "月2回くらいのペースで通いたい", "不定期でも気になったときに通いたい", "一度白くしたら、その後は維持として通いたい"
-    ])
+    styles = []
+    for opt in ["週1〜2回で集中して通いたい", "月2回くらいのペースで通いたい",
+                "不定期でも気になったときに通いたい", "一度白くしたら、その後は維持として通いたい"]:
+        if st.checkbox(opt, key=f"style_{opt}"):
+            styles.append(opt)
 
     st.markdown("**その他、気になること・不安など**")
     concerns = st.text_area("")
 
     st.subheader("■ 同意事項")
-    with st.expander("▼ ご確認ください（クリックで展開）", expanded=False):
+    with st.expander("▼ ご確認ください（クリックで表示）", expanded=False):
         st.markdown("""
 ●施術後の仕上がりには個人差があります。  
 ●医療機関で治療中の方は医師へ確認の上で施術を行ってください。  
-●施術後の返金には応じかねます。  
+●施術後の返金には応じかねます。
         """)
 
     agree = st.checkbox("上記注意事項をすべて確認し、同意しました。")
@@ -113,14 +121,16 @@ with st.form(key="counseling_form"):
         key="canvas"
     )
 
-    submit_btn = st.form_submit_button("送信", type="primary" if agree else "secondary")
+    if agree:
+        submit_btn = st.form_submit_button("送信", type="primary")
+    else:
+        submit_btn = st.form_submit_button("送信")
 
-    if submit_btn:
-        if not agree:
-            st.error("注意事項への同意が必要です。")
+    if submit_btn and agree:
+        st.success("回答を受け付けました（※保存処理は後で接続）")
+        if canvas_result.image_data is not None:
+            st.image(canvas_result.image_data, caption="署名画像（プレビュー）")
         else:
-            st.success("回答を受け付けました（※保存処理は後で接続）")
-            if canvas_result.image_data is not None:
-                st.image(canvas_result.image_data, caption="署名画像（プレビュー）")
-            else:
-                st.warning("署名が見つかりません。もう一度お試しください。")
+            st.warning("署名が見つかりません。もう一度お試しください。")
+    elif submit_btn and not agree:
+        st.error("注意事項への同意が必要です。")
